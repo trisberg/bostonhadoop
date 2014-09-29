@@ -3,5 +3,5 @@ Simple Groovy Hadoop app
 
 Run using:
 
-  spring run App.groovy
+    spring run App.groovy
 
