@@ -10,30 +10,24 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SparkTasklet implements Tasklet, InitializingBean {
 
 	private String master;
 
-	private String dataPath;
-	
-	private String outputDir;
-	
-	private String mainClass;
-	
 	private String jar;
+
+	private String mainClass;
+
+	private List<String> parameterValues;
 
 	private static final Log log = LogFactory.getLog(SparkTasklet.class);
 
 	public void setMaster(String master) {
 		this.master = master;
-	}
-
-	public void setDataPath(String dataPath) {
-		this.dataPath = dataPath;
-	}
-
-	public void setOutputDir(String outputDir) {
-		this.outputDir = outputDir;
 	}
 
 	public void setMainClass(String mainClass) {
@@ -44,9 +38,13 @@ public class SparkTasklet implements Tasklet, InitializingBean {
 		this.jar = jar;
 	}
 
+	public void setParameterValues(List<String> parameterValues) {
+		this.parameterValues = parameterValues;
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.state(dataPath != null , "The data path must be provided");
+		Assert.state(parameterValues.size() > 0, "The data path must be provided");
 	}
 
 	@Override
@@ -56,8 +54,12 @@ public class SparkTasklet implements Tasklet, InitializingBean {
 		log.info("Targeting: " + master);
 		log.info("Loading Jar: " + jar);
 		log.info("Running Class: " + mainClass);
+		log.info("With arguments: " + parameterValues);
 
-		SparkSubmit.main(new String[] {"--class", mainClass, "--master", master, jar, dataPath, outputDir});
+		List<String> submit = new ArrayList();
+		submit.addAll(Arrays.asList(new String[] {"--class", mainClass, "--master", master, jar}));
+		submit.addAll(parameterValues);
+		SparkSubmit.main(submit.toArray(new String[0]));
 
 		log.info("Done!");
 		
