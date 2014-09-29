@@ -1,0 +1,26 @@
+spring:
+    hadoop:
+        fsUri: hdfs://borneo:8020
+        resourceManagerHost: borneo
+    yarn:
+        appName: yarn-demo
+        applicationDir: /apps/yarn-demo/
+        client:
+            startup:
+                action: submit
+            localizer:
+                patterns:
+                  - "yarn-demo*jar"
+            files:
+              - "file:build/libs/yarn-demo-0.1.0.jar"
+            launchcontext:
+                archiveFile: yarn-demo-0.1.0.jar
+        appmaster:
+            localizer:
+                patterns:
+                  - "yarn-demo*jar"
+            containerCount: 1
+            launchcontext:
+                archiveFile: yarn-demo-0.1.0.jar
+                arguments:
+                    --spring.profiles.active: container
