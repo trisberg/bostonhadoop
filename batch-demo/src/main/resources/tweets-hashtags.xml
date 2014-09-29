@@ -44,9 +44,9 @@
 	</hadoop:script-tasklet>
 
 	<bean id="sparkTasklet" class="com.springdeveloper.demo.batch.spark.SparkTasklet" scope="step">
-		<!-- <property name="master" value="yarn-client"/> -->
-		<property name="master" value="local[2]"/>
-		<property name="jar" value="/Users/trisberg/Projects/BHUG/lib/spark-hashtags-0.1.0.jar"/>
+		<!-- <property name="master" value="local[2]"/> -->
+		<property name="master" value="yarn-client"/>
+		<property name="jar" value="../spark-hashtags/target/spark-hashtags-0.1.0.jar"/>
 		<property name="mainClass" value="com.springdeveloper.spark.SparkHashtags"/>
 		<property name="dataPath" value="#{jobParameters['inputDir'] + '/*'}"/>
 		<property name="outputDir" value="#{jobParameters['outputDir']}"></property>
