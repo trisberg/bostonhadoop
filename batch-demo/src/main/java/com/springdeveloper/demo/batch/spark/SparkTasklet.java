@@ -7,14 +7,12 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SparkTasklet implements Tasklet, InitializingBean {
+public class SparkTasklet implements Tasklet {
 
 	private String master;
 
@@ -40,11 +38,6 @@ public class SparkTasklet implements Tasklet, InitializingBean {
 
 	public void setParameterValues(List<String> parameterValues) {
 		this.parameterValues = parameterValues;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.state(parameterValues.size() > 0, "The data path must be provided");
 	}
 
 	@Override
