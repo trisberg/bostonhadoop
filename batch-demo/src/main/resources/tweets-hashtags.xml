@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:hadoop="http://www.springframework.org/schema/hadoop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<hadoop:configuration>
+		fs.defaultFS=${spring.hadoop.fsUri}
+		yarn.resourcemanager.address=${spring.hadoop.resourceManagerHost}
+	</hadoop:configuration>
+
+	<!--
+	  required to access #{jobParameters['...']}
+	-->
+	<bean class="org.springframework.batch.core.scope.StepScope">
+		<property name="proxyTargetClass" value="true"/>
+	</bean>
+
+	<batch:job id="job">
+	
+		<batch:step id="import" next="sparkApp">
+			<batch:tasklet ref="scriptTasklet"/>
+		</batch:step>
+	
+ 		<batch:step id="sparkApp" next="export">
+			<batch:tasklet ref="sparkTasklet"/>
+		</batch:step>
+
+		<batch:step id="export" parent="export-step"/>
+
+	</batch:job>
+
+	<hadoop:script-tasklet id="scriptTasklet" scope="step">
+		<hadoop:script location="classpath:file-prep.groovy">
+			<hadoop:property name="localFile" value="#{jobParameters['dataPath']}"/>
+			<hadoop:property name="inputDir" value="#{jobParameters['inputDir']}"/>
+			<hadoop:property name="outputDir" value="#{jobParameters['outputDir']}"/>
+		</hadoop:script>
+	</hadoop:script-tasklet>
+
+	<bean id="sparkTasklet" class="com.springdeveloper.demo.batch.spark.SparkTasklet" scope="step">
+		<!-- <property name="master" value="yarn-cluster"/> -->
+		<property name="master" value="local[2]"/>
+		<property name="jar" value="/Users/trisberg/Projects/BHUG/lib/spark-hashtags-0.1.0.jar"/>
+		<property name="mainClass" value="com.springdeveloper.spark.SparkHashtags"/>
+		<property name="dataPath" value="#{jobParameters['inputDir'] + '/*'}"/>
+		<property name="outputDir" value="#{jobParameters['outputDir']}"></property>
+	</bean>
+
+	<batch:step id="export-step">
+		<batch:tasklet>
+			<batch:chunk reader="hdfsReader" writer="jdbcWriter" commit-interval="10" skip-limit="100">
+				<batch:skippable-exception-classes>
+					<batch:include class="org.springframework.batch.item.file.FlatFileParseException" />
+				</batch:skippable-exception-classes>
+			</batch:chunk>
+		</batch:tasklet>
+	</batch:step>
+
+ 	<hadoop:resource-loader id="hdfsResourceLoader"/>
+ 
+	<bean id="hdfsReader" class="org.springframework.batch.item.file.MultiResourceItemReader" scope="step">
+		<property name="resources" 
+			value="#{ @hdfsResourceLoader.getResources(jobParameters['outputDir'] + '/part*') }"/>
+		<property name="delegate" ref="flatFileItemReader"/>
+	</bean>
+	<bean id="flatFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+		<property name="lineMapper">
+			<bean class="com.springdeveloper.demo.batch.spark.PairDataMapper"/>
+		</property>
+	</bean>
+
+	<bean id="jdbcWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+ 		<property name="sql" value="INSERT INTO top10_hashtags (hash_tag, count) VALUES (:hash_tag, :count)"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+		<property name="driverClassName" value="${spring.datasource.driverClassName}"/>
+		<property name="url" value="${spring.datasource.url}"/>
+		<property name="username" value="${spring.datasource.username}"/>
+		<property name="password" value="${spring.datasource.password}"/>
+	</bean>
+	<jdbc:initialize-database data-source="dataSource">
+		<jdbc:script location="classpath:mysql-schema.sql"/>
+	</jdbc:initialize-database>
+
+</beans>

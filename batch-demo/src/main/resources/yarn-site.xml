@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<configuration>
+
+  <property>
+    <name>yarn.resourcemanager.address</name>
+    <value>borneo:8032</value>
+  </property>
+
+</configuration>
