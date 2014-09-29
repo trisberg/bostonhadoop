@@ -1,6 +1,9 @@
 buildscript {
     ext {
         springBootVersion = '1.1.7.RELEASE'
+        springDataHadoopVersion = '2.0.2.RELEASE-hadoop24'
+        hadoopVersion = '2.4.1'
+        sparkVersion = '1.1.0'
     }
     repositories {
         mavenCentral()
@@ -35,14 +38,14 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-jdbc")
     compile("org.springframework.boot:spring-boot-starter-log4j")
     compile("org.springframework.boot:spring-boot-starter-batch")
-    compile("org.springframework.data:spring-data-hadoop:2.0.2.RELEASE-hadoop24") {
+    compile("org.springframework.data:spring-data-hadoop:${springDataHadoopVersion}") {
     	exclude group: 'javax.servlet', module: 'servlet-api'
     }
-    compile("org.apache.hadoop:hadoop-client:2.4.1")
-    compile("org.apache.hadoop:hadoop-yarn-server-web-proxy:2.4.1")
-    compile("org.apache.spark:spark-core_2.10:1.1.0")
-    compile("org.apache.spark:spark-yarn_2.10:1.1.0")
-    compile("org.apache.spark:spark-tools_2.10:1.1.0")
+    compile("org.apache.hadoop:hadoop-client:${hadoopVersion}")
+    compile("org.apache.hadoop:hadoop-yarn-server-web-proxy:${hadoopVersion}")
+    compile("org.apache.spark:spark-core_2.10:${sparkVersion}")
+    compile("org.apache.spark:spark-yarn_2.10:${sparkVersion}")
+    compile("org.apache.spark:spark-tools_2.10:${sparkVersion}")
     runtime("org.codehaus.groovy:groovy-all")
     runtime("mysql:mysql-connector-java:5.1.32")
     testCompile("org.springframework.boot:spring-boot-starter-test")
