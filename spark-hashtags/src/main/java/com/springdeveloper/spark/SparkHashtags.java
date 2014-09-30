@@ -76,7 +76,7 @@ public class SparkHashtags {
 				List<Tuple2<String, Integer>> hashTags = new ArrayList<Tuple2<String, Integer>>();
 				if (hashTagEntries != null && hashTagEntries.size() > 0) {
 					for (Map<String, Object> hashTagEntry : hashTagEntries) {
-						String hashTag = hashTagEntry.get("text").toString();
+						String hashTag = hashTagEntry.get("text").toString().toLowerCase();
 						hashTags.add(new Tuple2<String, Integer>(hashTag, 1));
 					}
 				}
