@@ -20,7 +20,7 @@ public class SparkTasklet implements Tasklet {
 
 	private String mainClass;
 
-	private List<String> parameterValues;
+	private List<String> applicationArguments;
 
 	private static final Log log = LogFactory.getLog(SparkTasklet.class);
 
@@ -36,8 +36,8 @@ public class SparkTasklet implements Tasklet {
 		this.jar = jar;
 	}
 
-	public void setParameterValues(List<String> parameterValues) {
-		this.parameterValues = parameterValues;
+	public void setApplicationArguments(List<String> applicationArguments) {
+		this.applicationArguments = applicationArguments;
 	}
 
 	@Override
@@ -47,11 +47,11 @@ public class SparkTasklet implements Tasklet {
 		log.info("Targeting: " + master);
 		log.info("Loading Jar: " + jar);
 		log.info("Running Class: " + mainClass);
-		log.info("With arguments: " + parameterValues);
+		log.info("With arguments: " + applicationArguments);
 
 		List<String> submit = new ArrayList();
-		submit.addAll(Arrays.asList(new String[] {"--class", mainClass, "--master", master, jar}));
-		submit.addAll(parameterValues);
+		submit.addAll(Arrays.asList(new String[]{"--class", mainClass, "--master", master, jar}));
+		submit.addAll(applicationArguments);
 		SparkSubmit.main(submit.toArray(new String[0]));
 
 		log.info("Done!");
