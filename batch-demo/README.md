@@ -9,5 +9,5 @@ Build with:
 
 Run with:
 
-    java -jar build/libs/batch-demo-0.1.0.jar dataPath=data/hadoop-tweets_2014-08-11.txt inputDir=hdfs://borneo:8020/tweets/input outputDir=hdfs://borneo:8020/tweets/counts
+    java -jar build/libs/batch-demo-0.1.0.jar dataPath=data/hadoop-tweets_2014-08-11.txt inputDir=/tweets/input outputDir=/tweets/counts
 
