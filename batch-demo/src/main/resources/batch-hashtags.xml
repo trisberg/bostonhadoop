@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:hadoop="http://www.springframework.org/schema/hadoop"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:batch="http://www.springframework.org/schema/batch"
-       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+	xmlns:hadoop="http://www.springframework.org/schema/hadoop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
 		http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<hadoop:configuration>
 		fs.defaultFS=${spring.hadoop.fsUri}
 		yarn.resourcemanager.address=${spring.hadoop.resourceManagerHost}
+		mapreduce.framework.name=yarn
+		mapreduce.jobhistory.address=${spring.hadoop.jobHistoryAddress}
 	</hadoop:configuration>
 
 	<!--
@@ -25,12 +25,12 @@
 
 	<batch:job id="job">
 	
-		<batch:step id="import" next="sparkApp">
+		<batch:step id="import" next="hashtags">
 			<batch:tasklet ref="scriptTasklet"/>
 		</batch:step>
 	
- 		<batch:step id="sparkApp" next="export">
-			<batch:tasklet ref="sparkTasklet"/>
+ 		<batch:step id="hashtags" next="export">
+			<batch:tasklet ref="hashtagsTasklet"/>
 		</batch:step>
 
 		<batch:step id="export" parent="export-step"/>
@@ -45,22 +45,19 @@
 		</hadoop:script>
 	</hadoop:script-tasklet>
 
-	<bean id="sparkTasklet" class="com.springdeveloper.demo.batch.spark.SparkTasklet" scope="step">
-		<!-- specify parameter master as local[*], yarn-client or spark://host:port -->
-		<property name="master" value="#{jobParameters['master']?:'local[*]'}"/>
-		<property name="jar" value="../spark-hashtags/target/spark-hashtags-0.1.0.jar"/>
-		<property name="mainClass" value="com.springdeveloper.spark.SparkHashtags"/>
-		<property name="applicationArguments">
-			<util:list>
-				<value>#{jobParameters['inputDir'] + '/*'}</value>
-				<value>#{jobParameters['outputDir']}</value>
-			</util:list>
-		</property>
-	</bean>
+	<hadoop:job-tasklet id="hashtagsTasklet" job-ref="hashtagsJob" scope="step"/>
+
+	<hadoop:job id="hashtagsJob"
+		input-path="#{jobParameters['inputDir'] + '/*'}"
+		output-path="#{jobParameters['outputDir']}/hashtags"
+		jar="file:#{systemProperties['user.dir']}/../tweets-hashtags/target/tweets-hashtags-0.1.0.jar"
+		mapper="com.springdeveloper.hadoop.TweetCountMapper"
+		reducer="com.springdeveloper.hadoop.IntSumReducer"
+		scope="step" />
 
 	<batch:step id="export-step">
 		<batch:tasklet>
-			<batch:chunk reader="hdfsReader" writer="jdbcWriter" commit-interval="10" skip-limit="100">
+			<batch:chunk reader="hdfsReader" writer="jdbcWriter" commit-interval="100" skip-limit="100">
 				<batch:skippable-exception-classes>
 					<batch:include class="org.springframework.batch.item.file.FlatFileParseException" />
 				</batch:skippable-exception-classes>
@@ -72,17 +69,17 @@
  
 	<bean id="hdfsReader" class="org.springframework.batch.item.file.MultiResourceItemReader" scope="step">
 		<property name="resources" 
-			value="#{ @hdfsResourceLoader.getResources(jobParameters['outputDir'] + '/part*') }"/>
+			value="#{ @hdfsResourceLoader.getResources(jobParameters['outputDir'] + '/hashtags/part*') }"/>
 		<property name="delegate" ref="flatFileItemReader"/>
 	</bean>
 	<bean id="flatFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
 		<property name="lineMapper">
-			<bean class="com.springdeveloper.demo.batch.spark.PairDataMapper"/>
+			<bean class="com.springdeveloper.demo.batch.PairDataMapper"/>
 		</property>
 	</bean>
 
 	<bean id="jdbcWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
- 		<property name="sql" value="INSERT INTO top10_hashtags (hash_tag, count) VALUES (:hash_tag, :count)"/>
+ 		<property name="sql" value="INSERT INTO hashtag_counts (hash_tag, count) VALUES (:hash_tag, :count)"/>
 		<property name="dataSource" ref="dataSource"/>
 	</bean>
 
@@ -95,8 +92,5 @@
 	<jdbc:initialize-database data-source="dataSource">
 		<jdbc:script location="classpath:mysql-schema.sql"/>
 	</jdbc:initialize-database>
-	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="dataSource"/>
-	</bean>
 
 </beans>

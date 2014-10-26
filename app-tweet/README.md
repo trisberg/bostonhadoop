@@ -5,5 +5,5 @@ From a [tweet](https://twitter.com/rob_winch/status/364871658483351552) by Rob W
 
 Run using:
 
-    spring run tweet.groovy
+  spring run AppTweet.groovy
 

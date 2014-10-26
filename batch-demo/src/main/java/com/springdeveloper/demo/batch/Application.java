@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ImportResource;
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
-@ImportResource("tweets-hashtags.xml")
+@ImportResource("batch-hashtags.xml")
 @EnableBatchProcessing
 public class Application {
 

@@ -7,3 +7,5 @@ spring:
   hadoop:
     fsUri: hdfs://borneo:8020
     resourceManagerHost: borneo
+    jobHistoryAddress: borneo:10020
+    
