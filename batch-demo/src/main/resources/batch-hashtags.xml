@@ -29,7 +29,7 @@
 			<batch:tasklet ref="scriptTasklet"/>
 		</batch:step>
 	
- 		<batch:step id="hashtags" next="export">
+		<batch:step id="hashtags" next="export">
 			<batch:tasklet ref="hashtagsTasklet"/>
 		</batch:step>
 
