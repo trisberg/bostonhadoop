@@ -14,7 +14,7 @@ public class PairDataMapper implements LineMapper<Map<String, Object>> {
 	private static final Log logger = LogFactory.getLog(PairDataMapper.class);
 
 	public Map<String, Object> mapLine(String line, int lineNum) throws Exception {
-		logger.info("Mapping: " + line);
+		logger.info("Reading: " + line);
 		Assert.notNull(line, "Expecting line not to be null");
 		Assert.isTrue(line.length() > 2, "Expecting line to have length greater than 2");
 //		String pair = line.substring(1, line.length()-1);
