@@ -15,19 +15,20 @@ import org.springframework.yarn.annotation.YarnComponent;
 @EnableAutoConfiguration
 public class Application {
 
-    public static void main(String[] args) {
-    	new HelloPojo();
-        SpringApplication.run(Application.class, args);
-    }
-    
-    @YarnComponent
-    @Profile("container")
-    public static class HelloPojo {
-    	private static final Log log = LogFactory.getLog(HelloPojo.class);
-    	
-    	@OnContainerStart
-    	public void onStart() {
-    		log.info("Hello from YARN!");
-    	}
+	public static void main(String[] args) {
+		new HelloPojo();
+		SpringApplication.run(Application.class, args);
+	}
+
+	@YarnComponent
+	@Profile("container")
+	public static class HelloPojo {
+
+		private static final Log log = LogFactory.getLog(HelloPojo.class);
+
+		@OnContainerStart
+		public void onStart() {
+			log.info("Hello from YARN!");
+		}
 	}
 }
