@@ -1,7 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.1.7.RELEASE'
-        springDataHadoopVersion = '2.0.2.RELEASE-hadoop24'
+        springBootVersion = '1.1.8.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -32,8 +31,7 @@ dependencies {
 		exclude group: 'ch.qos.logback', module: 'logback-classic'
 		exclude group:'org.slf4j', module: 'log4j-over-slf4j'
     }
-    compile("org.springframework.data:spring-yarn-boot:${springDataHadoopVersion}")
-    testCompile("org.springframework.boot:spring-boot-starter-test")
+    compile("org.springframework.data:spring-yarn-boot:2.0.2.RELEASE-hadoop24")
 }
 
 eclipse {

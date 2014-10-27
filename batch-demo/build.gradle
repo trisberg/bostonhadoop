@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '1.1.7.RELEASE'
+        springBootVersion = '1.1.8.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -52,5 +52,5 @@ eclipse {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+    gradleVersion = '2.1'
 }
