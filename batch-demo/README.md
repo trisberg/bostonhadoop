@@ -5,7 +5,7 @@ Build with:
 
     gradle clean build
 
-    (also, build the spark-hashtags project using `mvn clean install` before running the batch job)
+    (also, build the tweets-hashtags project using `mvn clean install` before running the batch job)
 
 Run with:
 
